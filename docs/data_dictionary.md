@@ -1,0 +1,13 @@
+# Data Fields for Each Abstract
+- id: unique ID (prefer Semantic Scholar Paper ID)
+- title
+- authors
+- venue (journal or conference)
+- year
+- abstract
+- keywords (if available)
+- source: always “Semantic Scholar”
+- url
+- retrieved_at (date you collected it)
+- seed_query (which search keyword found it)
+- notes (optional comments)
