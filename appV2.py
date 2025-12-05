@@ -233,12 +233,7 @@ def main():
 with st.sidebar:
     st.header("Search Settings")
 
- if advanced_on:
-        mode = "Advanced Lab"
-        st.caption("Advanced mode combines TF-IDF, BM25, and SentenceTransformer semantic similarity.")
-    else:
-        mode = "Simple Search"
-        st.caption("Simple mode uses TF-IDF ranking for fast, interpretable search.")
+    advanced_on = st.toggle("Advanced Lab (TF-IDF + BM25 + Semantic)", value=False)
 
     if advanced_on:
         mode = "Advanced Lab"
