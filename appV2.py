@@ -233,20 +233,18 @@ def main():
 with st.sidebar:
     st.header("Search Settings")
 
-    # Single toggle: OFF = Simple, ON = Advanced
-    advanced_on = st.toggle("Use Advanced Lab", value=False)
+ if advanced_on:
+        mode = "Advanced Lab"
+        st.caption("Advanced mode combines TF-IDF, BM25, and SentenceTransformer semantic similarity.")
+    else:
+        mode = "Simple Search"
+        st.caption("Simple mode uses TF-IDF ranking for fast, interpretable search.")
 
     if advanced_on:
         mode = "Advanced Lab"
-    else:
-        mode = "Simple Search"
-
-    # Make the current mode VERY explicit
-    st.markdown(f"**Current mode:** {mode}")
-
-    if mode == "Advanced Lab":
         st.caption("Advanced mode combines TF-IDF, BM25, and SentenceTransformer semantic similarity.")
     else:
+        mode = "Simple Search"
         st.caption("Simple mode uses TF-IDF ranking for fast, interpretable search.")
 
     max_results = st.slider(
@@ -267,6 +265,7 @@ with st.sidebar:
         )
     else:
         tfidf_threshold = 0.0  # Not used in simple mode
+
 
 
     # Load data and indices
