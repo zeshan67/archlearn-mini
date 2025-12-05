@@ -9,3 +9,12 @@ Scope:
 - English language
 - From 2015 to 2025
 - Focused on architecture and art education
+
+Technical plan:
+- Retrieval model: keyword-based and simple semantic (TF-IDF + optional Sentence-BERT)
+- Visualization plan:
+  - Word cloud of top keywords
+  - Bar chart of most frequent terms per decade
+  - Line chart showing rise/fall of key topics over time
+  - Search interface for exploring abstracts
+  - Location map

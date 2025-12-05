@@ -10,4 +10,5 @@
 - url
 - retrieved_at (date you collected it)
 - seed_query (which search keyword found it)
+- location (where the research originated)
 - notes (optional comments)

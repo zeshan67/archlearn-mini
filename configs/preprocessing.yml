@@ -1,0 +1,6 @@
+language: english
+lowercase: true
+remove_stopwords: true
+lemmatize: true
+min_token_length: 3
+ngram_range: [1,2]
