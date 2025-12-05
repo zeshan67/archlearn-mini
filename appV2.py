@@ -230,36 +230,40 @@ def main():
 
     st.title("ArchLearn Mini – IR Lab for Creative Learning Research")
 
-    with st.sidebar:
-        st.header("Search Settings")
+with st.sidebar:
+    st.header("Search Settings")
 
-        advanced_on = st.toggle("Advanced Lab (TF-IDF + BM25 + Semantic)", value=False)
+    # Toggle with no visible label
+    advanced_on = st.toggle(label="", value=False)
 
-        if advanced_on:
-            mode = "Advanced Lab"
-            st.caption("Advanced mode combines TF-IDF, BM25, and SentenceTransformer semantic similarity.")
-        else:
-            mode = "Simple Search"
-            st.caption("Simple mode uses TF-IDF ranking for fast, interpretable search.")
+    # Dynamic "label" that changes with the toggle
+    if advanced_on:
+        mode = "Advanced Lab"
+        st.markdown("**Mode: Advanced Lab**")
+        st.caption("Advanced mode combines TF-IDF, BM25, and SentenceTransformer semantic similarity.")
+    else:
+        mode = "Simple Search"
+        st.markdown("**Mode: Simple Search**")
+        st.caption("Simple mode uses TF-IDF ranking for fast, interpretable search.")
 
-        max_results = st.slider(
-            "Max results to display",
-            min_value=10,
-            max_value=100,
-            value=20,
-            step=10
+    max_results = st.slider(
+        "Max results to display",
+        min_value=10,
+        max_value=100,
+        value=20,
+        step=10
+    )
+
+    if mode == "Advanced Lab":
+        tfidf_threshold = st.slider(
+            "TF-IDF threshold (filter)",
+            min_value=0.0,
+            max_value=0.2,
+            value=0.05,
+            step=0.01
         )
-
-        if mode == "Advanced Lab":
-            tfidf_threshold = st.slider(
-                "TF-IDF threshold (filter)",
-                min_value=0.0,
-                max_value=0.2,
-                value=0.05,
-                step=0.01
-            )
-        else:
-            tfidf_threshold = 0.0  # Not used in simple mode
+    else:
+        tfidf_threshold = 0.0  # Not used in simple mode
 
     # Load data and indices
     df, vectorizer, tfidf_matrix, bm25, semantic_model, doc_embeddings = load_corpus_and_indices()
