@@ -236,7 +236,7 @@ def main():
         advanced_on = st.toggle("Simple Search / Advanced Search", value=False)
 
         if advanced_on:
-            mode = "Advanced Lab"
+            mode = "Advanced Search"
             st.caption("Advanced mode combines TF-IDF, BM25, and SentenceTransformer semantic similarity.")
         else:
             mode = "Simple Search"
