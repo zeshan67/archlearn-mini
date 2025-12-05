@@ -27,11 +27,12 @@ def load_corpus_and_indices(corpus_path="data/interim/corpus_v1.csv"):
         raise ValueError("Corpus must have an 'abstract' column.")
     if "title" not in df.columns:
         df["title"] = "Untitled"
-    # Use 'region' instead of 'location'
     if "region" not in df.columns:
         df["region"] = "Unknown"
     if "year" not in df.columns:
         df["year"] = None
+    if "url" not in df.columns:
+        df["url"] = ""
 
     df["abstract"] = df["abstract"].astype(str)
     df["title"] = df["title"].astype(str)
@@ -78,6 +79,7 @@ def simple_search(query, df, vectorizer, tfidf_matrix, max_results=20):
             "abstract": df.iloc[idx]["abstract"],
             "region": df.iloc[idx].get("region", "Unknown"),
             "year": df.iloc[idx].get("year", None),
+            "url": df.iloc[idx].get("url", ""),
             "tfidf_score": float(scores[idx])
         })
     return results
@@ -123,6 +125,7 @@ def advanced_search(
             "abstract": df.iloc[idx]["abstract"],
             "region": df.iloc[idx].get("region", "Unknown"),
             "year": df.iloc[idx].get("year", None),
+            "url": df.iloc[idx].get("url", ""),
             "tfidf_score": tfidf_score,
             "bm25_score": float(bm25_scores[idx]),
             "semantic_score": float(semantic_scores[idx])
@@ -158,14 +161,19 @@ def make_country_map(df, results):
     if counts.empty:
         return None
 
-    # We treat 'region' as country names for mapping
+    # Treat 'region' as country names
     fig = px.choropleth(
         counts,
         locations="region",
         locationmode="country names",
         color="count",
-        color_continuous_scale="Blues",
+        color_continuous_scale="Viridis",
+        projection="natural earth",
         title="Research density by region (for this query)"
+    )
+    fig.update_layout(
+        margin=dict(l=0, r=0, t=40, b=0),
+        template="plotly_white"
     )
     return fig
 
@@ -187,13 +195,21 @@ def make_timeline(df, results):
 
     subset["year"] = subset["year"].astype(int)
     counts = subset.groupby("year").size().reset_index(name="count")
+    counts = counts.sort_values("year")
 
-    fig = px.line(
+    fig = px.bar(
         counts,
         x="year",
         y="count",
-        markers=True,
-        title="Matched documents over time"
+        title="Matched documents over time",
+    )
+    fig.update_layout(
+        xaxis=dict(
+            tickmode="linear",
+            dtick=1  # integer years: 2021, 2022, 2023, ...
+        ),
+        template="plotly_white",
+        margin=dict(l=0, r=0, t=40, b=0)
     )
     return fig
 
@@ -217,11 +233,14 @@ def main():
     with st.sidebar:
         st.header("Search Settings")
 
-        mode = st.radio(
-            "Mode",
-            options=["Simple Search", "Advanced Lab"],
-            index=0
-        )
+        advanced_on = st.toggle("Advanced Lab (TF-IDF + BM25 + Semantic)", value=False)
+
+        if advanced_on:
+            mode = "Advanced Lab"
+            st.caption("Advanced mode combines TF-IDF, BM25, and SentenceTransformer semantic similarity.")
+        else:
+            mode = "Simple Search"
+            st.caption("Simple mode uses TF-IDF ranking for fast, interpretable search.")
 
         max_results = st.slider(
             "Max results to display",
@@ -245,9 +264,10 @@ def main():
     # Load data and indices
     df, vectorizer, tfidf_matrix, bm25, semantic_model, doc_embeddings = load_corpus_and_indices()
 
-    # Main search UI
-    query = st.text_input("Enter your search query")
-    run_button = st.button("Search")
+    # --- Search form (Enter key submits) ---
+    with st.form("search_form"):
+        query = st.text_input("Enter your search query")
+        run_button = st.form_submit_button("Search")
 
     results = []
     if run_button and query.strip():
@@ -282,6 +302,34 @@ def main():
     # Layout for results + analytics
     col_results, col_analytics = st.columns([2, 1])
 
+    # Precompute normalization for score bars (for advanced mode)
+    if results and mode == "Advanced Lab":
+        tfidf_vals = np.array([r["tfidf_score"] for r in results])
+        bm25_vals = np.array([r["bm25_score"] for r in results])
+        sem_vals = np.array([r["semantic_score"] for r in results])
+
+        def normalize(arr):
+            mn = float(arr.min())
+            mx = float(arr.max())
+            if mx == mn:
+                return np.ones_like(arr) * 0.5
+            return (arr - mn) / (mx - mn)
+
+        tfidf_norm = normalize(tfidf_vals)
+        bm25_norm = normalize(bm25_vals)
+        sem_norm = normalize(sem_vals)
+    elif results and mode == "Simple Search":
+        tfidf_vals = np.array([r["tfidf_score"] for r in results])
+
+        def normalize_simple(arr):
+            mn = float(arr.min())
+            mx = float(arr.max())
+            if mx == mn:
+                return np.ones_like(arr) * 0.5
+            return (arr - mn) / (mx - mn)
+
+        tfidf_norm = normalize_simple(tfidf_vals)
+
     with col_results:
         st.subheader("Search Results")
 
@@ -290,8 +338,41 @@ def main():
         elif results:
             st.write(f"Showing {len(results)} result(s).")
 
-            for r in results:
-                with st.expander(f"{r['title']}"):
+            for i, r in enumerate(results):
+                st.markdown(f"### {r['title']}")
+
+                # --- Score bars (always visible) ---
+                if mode == "Simple Search":
+                    bar_cols = st.columns(1)
+                    c = bar_cols[0]
+                    c.write("TF-IDF score")
+                    c.progress(float(tfidf_norm[i]), text=f"{r['tfidf_score']:.4f}")
+                else:
+                    bar_cols = st.columns(3)
+
+                    # TF-IDF
+                    bar_cols[0].write("TF-IDF")
+                    bar_cols[0].progress(
+                        float(tfidf_norm[i]),
+                        text=f"{r['tfidf_score']:.4f}"
+                    )
+
+                    # BM25
+                    bar_cols[1].write("BM25")
+                    bar_cols[1].progress(
+                        float(bm25_norm[i]),
+                        text=f"{r['bm25_score']:.4f}"
+                    )
+
+                    # Semantic
+                    bar_cols[2].write("Semantic")
+                    bar_cols[2].progress(
+                        float(sem_norm[i]),
+                        text=f"{r['semantic_score']:.4f}"
+                    )
+
+                # --- Details in dropdown ---
+                with st.expander("Details: year, region, abstract, link"):
                     meta = []
                     if r.get("year") is not None and not pd.isna(r.get("year")):
                         meta.append(f"Year: {int(r['year'])}")
@@ -300,18 +381,16 @@ def main():
                     if meta:
                         st.write(" | ".join(meta))
 
-                    # Scores
-                    if mode == "Simple Search":
-                        st.write(f"**TF-IDF score:** {r['tfidf_score']:.4f}")
-                    else:
-                        st.write(
-                            f"**TF-IDF:** {r['tfidf_score']:.4f} | "
-                            f"**BM25:** {r['bm25_score']:.4f} | "
-                            f"**Semantic:** {r['semantic_score']:.4f}"
-                        )
-
                     st.write("**Abstract:**")
                     st.write(r["abstract"])
+
+                    url = r.get("url", "").strip()
+                    if url:
+                        st.link_button("Read the research", url)
+                    else:
+                        st.caption("No URL available for this record.")
+
+                st.markdown("---")
 
     with col_analytics:
         st.subheader("Analytics")
