@@ -233,7 +233,7 @@ def main():
     with st.sidebar:
         st.header("Search Settings")
 
-        advanced_on = st.toggle("Simple Search / Advanced Lab", value=False)
+        advanced_on = st.toggle("Simple Search / Advanced Search", value=False)
 
         if advanced_on:
             mode = "Advanced Lab"
