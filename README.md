@@ -36,4 +36,6 @@ Source code can be found at: search_advanced.py
 
 ## **Local Execution**  
 To run the application on a local machine, download the whole folder from github or clone the repository using github desktop and execute:
-appV2.py  
+appV2.py 
+
+Demonstration of the web version can be viewed at: https://youtu.be/75ECwvEFhdU
