@@ -1,39 +1,39 @@
 # archlearn-mini
 ArchLearn Mini is a small-scale information retrieval and text-analytics system designed to map and visualize research patterns surrounding creative learning in architecture and art education.
 
-The system is deployed as a web application and available at:
+The system is deployed as a web application and available at:\
 https://archlearnminiv1-zeshanasif.streamlit.app/
 Note: The application may require up to two minutes to initialize before use, followed by a page reload.
 
 ## **Objective of the project:**
-- The primary idea is to demonstrate the viability of developing a lightweight information retrieval platform that supports efficient exploration of research abstracts in the field of creative learning and architecture education.
-- From a technical standpoint, integration of multiple retrieval techniques (TF-IDF, BM25, and semantic similarity) to improve the accuracy, relevance, and interpretability of search results were examined.
-- The ultimate goal was to provide an accessible, visual, and interactive web interface enabling users to analyze retrieved research data by geographic distribution, publication trends, and document metadata.
+- The primary idea is to demonstrate the viability of developing a lightweight information retrieval platform that supports efficient exploration of research abstracts in the field of creative learning and architecture education.\
+- From a technical standpoint, integration of multiple retrieval techniques (TF-IDF, BM25, and semantic similarity) to improve the accuracy, relevance, and interpretability of search results were examined.\
+- The ultimate goal was to provide an accessible, visual, and interactive web interface enabling users to analyze retrieved research data by geographic distribution, publication trends, and document metadata.\
 
 ## **How it works:**
 -At startup, the system loads and preprocesses the dataset (including titles, abstracts, regions, and publication years)
--Then it constructs three retrieval indices: a TF-IDF matrix, a BM25 model, and semantic embeddings generated via a SentenceTransformer model. The user can choose between a simple TF-IDF-based search or an advanced search that combines TF-IDF, BM25, and semantic similarity scores.
--Queries entered through the interface are processed to compute document similarity, filter low-scoring results, and return ranked documents along with metadata such as abstract text and external URLs. The interface also visualizes returned results with dynamically normalized scoring bars and supports geographic and temporal analytics through Plotly choropleth maps and bar-chart timelines. A persistent query log is maintained in the Streamlit session state to support iterative search exploration.
+-Then it constructs three retrieval indices: a TF-IDF matrix, a BM25 model, and semantic embeddings generated via a SentenceTransformer model. The user can choose between a simple TF-IDF-based search or an advanced search that combines TF-IDF, BM25, and semantic similarity scores.\
+-Queries entered through the interface are processed to compute document similarity, filter low-scoring results, and return ranked documents along with metadata such as abstract text and external URLs. The interface also visualizes returned results with dynamically normalized scoring bars and supports geographic and temporal analytics through Plotly choropleth maps and bar-chart timelines. A persistent query log is maintained in the Streamlit session state to support iterative search exploration.\
 
-**Added information on how the models work:**
-For TF-IDF Matrix, system uses Term Frequency–Inverse Document Frequency to convert each abstract into a weighted vector representation that reflects the importance of words relative to the entire corpus. Term frequency captures how frequently a term appears in a document, while inverse document frequency down-weights terms that are common across many documents, thus emphasizing more discriminative vocabulary. The implementation uses TfidfVectorizer configured with English stop-word removal and both unigram and bigram features, resulting in a sparse document-term matrix. Query vectors are generated using the same model, and cosine similarity between the query and document vectors is computed to produce ranked retrieval results. This approach is computationally efficient, interpretable, and well suited for keyword-based searches.
+**Added information on how the models work:**\
+For TF-IDF Matrix, system uses Term Frequency–Inverse Document Frequency to convert each abstract into a weighted vector representation that reflects the importance of words relative to the entire corpus. Term frequency captures how frequently a term appears in a document, while inverse document frequency down-weights terms that are common across many documents, thus emphasizing more discriminative vocabulary. The implementation uses TfidfVectorizer configured with English stop-word removal and both unigram and bigram features, resulting in a sparse document-term matrix. Query vectors are generated using the same model, and cosine similarity between the query and document vectors is computed to produce ranked retrieval results. This approach is computationally efficient, interpretable, and well suited for keyword-based searches.\
 
-For the BM25 Model: It improves lexical retrieval by incorporating a probabilistic relevance framework that adjusts for document length and term saturation effects. It operates on tokenized text, using a scoring function that increases with term frequency but with diminishing returns once a term appears frequently enough in a document. A length-normalization component prevents longer abstracts from dominating results purely due to having more text. The system applies BM25 using the BM25Okapi implementation to compute scores for all documents given a query, providing a stronger and more robust lexical matching signal than TF-IDF alone, particularly when dealing with uneven document sizes.
+For the BM25 Model: It improves lexical retrieval by incorporating a probabilistic relevance framework that adjusts for document length and term saturation effects. It operates on tokenized text, using a scoring function that increases with term frequency but with diminishing returns once a term appears frequently enough in a document. A length-normalization component prevents longer abstracts from dominating results purely due to having more text. The system applies BM25 using the BM25Okapi implementation to compute scores for all documents given a query, providing a stronger and more robust lexical matching signal than TF-IDF alone, particularly when dealing with uneven document sizes.\
 
-For Semantic embeddings : To capture conceptual similarity beyond surface-level term overlap, the system encodes each abstract and query into dense semantic embeddings using the pre-trained SentenceTransformer model "all-MiniLM-L6-v2". These embeddings are generated by a transformer architecture trained on large-scale sentence similarity data, enabling the model to recognize paraphrases, related terminology, and contextual meaning. Cosine similarity between the query embedding and document embeddings is used to rank conceptually relevant texts even when they do not share explicit vocabulary with the query. This semantic scoring complements the lexical methods by retrieving research that aligns with the user’s intent rather than strictly matching keywords.
+For Semantic embeddings : To capture conceptual similarity beyond surface-level term overlap, the system encodes each abstract and query into dense semantic embeddings using the pre-trained SentenceTransformer model "all-MiniLM-L6-v2". These embeddings are generated by a transformer architecture trained on large-scale sentence similarity data, enabling the model to recognize paraphrases, related terminology, and contextual meaning. Cosine similarity between the query embedding and document embeddings is used to rank conceptually relevant texts even when they do not share explicit vocabulary with the query. This semantic scoring complements the lexical methods by retrieving research that aligns with the user’s intent rather than strictly matching keywords.\
 
 
-## **Information Retrieval System**
+## **Information Retrieval System**\
 
-The system includes two search modes:
+The system includes two search modes:\
 
-### _Simple Search Mode_
+### _Simple Search Mode_\
 Utilizes a TF-IDF retrieval model.
 Source code is stored on:search_cli.py
-### _Advanced Search Mode_
+### _Advanced Search Mode_\
 Integrates TF-IDF, BM25, and semantic similarity scoring.
 Source code can be found at: search_advanced.py
 
-## **Local Execution**
+## **Local Execution**\
 To run the application on a local machine, download the whole folder from github or clone the repository using github desktop and execute:
 appV2.py
