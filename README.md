@@ -8,3 +8,4 @@ There are 2 modes of IR search. A simple mode (uses TF-IDF). The source code can
 The advanced search uses a combination of TF-IDF, BM25 and semantic scores. The source code can be found at "search_advanced.py" file
 
 If the app needs to run on a local machine, just run the compiled version on the file called "appV2.py"
+Required python libraries can be found "requirements.txt" file in case they are missing.
